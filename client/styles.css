@@ -9,3 +9,6 @@ Feel free to use it if you like. */
 svg {
   background-color: rgba(200,0,0, 0.5);
 }
+.enemy {
+  fill: red;
+}
