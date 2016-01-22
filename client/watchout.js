@@ -3,7 +3,8 @@ var gameOptions = {
   height: '450px',
   width: '700px',
   nEnemies: '30px',
-  padding: '20px'
+  padding: '20px',
+  stepInterval: 10, // miliseconds 
 };
 
 var gameStats = {
@@ -21,12 +22,37 @@ var gameBoard = d3.select('.board').append('svg:svg')
                 .attr('height', gameOptions.height)
                 .attr('class','gameBoard');
 
-var enemies = [[10,10],[20,40],[40,80]];
+var sv = 0.1;
+var enemies = [ {xPos:10, yPos:10, xVel: sv, yVel: sv},
+                {xPos:20, yPos:40, xVel: sv, yVel: sv},
+                {xPos:40, yPos:80, xVel: sv, yVel: sv},
+              ];
 
-d3.select('.gameBoard').selectAll('circle')
-  .data(enemies).enter()
-  .append('circle').attr('class','enemy')
-  .attr('cx', function(d){return axes.x(d[0]);})
-  .attr('cy', function(d){return axes.y(d[1]);})
-  .attr('r', 5); //could come back and make styling data-dependent
 
+
+var integrateVelocity = function(enemy, key) {
+  enemy[key + "Pos"] += enemy[key + "Vel"] * gameOptions.stepInterval;
+  return enemy[key + 'Pos'];
+};
+
+var update = function() {
+  console.log('update');
+  //updateEnemies
+  var enemiesSelection = d3.select('.gameBoard').selectAll('circle')
+    .data(enemies);
+    
+
+  enemiesSelection.enter()
+    .append('circle').attr('class','enemy');
+
+  enemiesSelection.attr('cx', function(d){
+      return integrateVelocity(d, 'x');})
+    .attr('cy', function(d){
+      return integrateVelocity(d, 'y');})
+    .attr('r', 5); //could come back and make styling data-dependent
+
+  enemiesSelection.exit().remove();
+  //updatePlayer()
+};
+
+setInterval(update, gameOptions.stepInterval);
