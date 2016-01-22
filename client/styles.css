@@ -3,3 +3,9 @@
 /* Note: an asteroid image is included in this repo.
 Feel free to use it if you like. */
 
+.board {
+  background-color: rgba(0,0,200, 0.5);
+}
+svg {
+  background-color: rgba(200,0,0, 0.5);
+}
