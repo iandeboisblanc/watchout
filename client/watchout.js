@@ -4,7 +4,7 @@ var gameOptions = {
   width: '700px',
   nEnemies: '30px',
   padding: '20px',
-  stepInterval: 10, // miliseconds 
+  stepInterval: 1000, // miliseconds 
 };
 
 var gameStats = {
@@ -61,8 +61,10 @@ var bounceOffWalls = function(enemy, xOrY) {
 };
 
 var updatePosition = function(enemy, xOrY) {
-  integrateVelocity(enemy, xOrY);
-  bounceOffWalls(enemy, xOrY);  
+  // integrateVelocity(enemy, xOrY);
+  // bounceOffWalls(enemy, xOrY);
+  //generate new xory randomly from 0 to 100
+  enemy[xOrY + 'Pos'] = Math.random()*100;  
   return axes[xOrY](enemy[xOrY + 'Pos']);
 };
 
@@ -83,7 +85,10 @@ var update = function() {
   enemiesSelection.enter()
     .append('circle')
     .attr('class','enemy');
-  enemiesSelection.attr('cx', function(d){
+  enemiesSelection
+    .transition()
+    .duration(gameOptions.stepInterval)
+    .attr('cx', function(d){
       return updatePosition(d, 'x');})
     .attr('cy', function(d){
       return updatePosition(d, 'y');})
