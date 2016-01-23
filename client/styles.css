@@ -16,6 +16,8 @@ svg {
 }
 .enemy {
   fill: rgba(250,0,0,0.3);
+  animation: rotate 1s linear infinite;
+  transform-origin: 50% 50%;
 }
 .centered {
   margin: auto;
@@ -28,8 +30,7 @@ svg {
   fill: black;
   stroke: yellow;
 }
-/*image {
-  height: 30px;
-  width: 30px;
-  visibility: visible;
-}*/
+
+@keyframes rotate {
+  100% {transform: rotate(360deg);};
+}
