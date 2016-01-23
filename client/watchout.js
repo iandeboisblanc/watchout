@@ -29,10 +29,13 @@ var enemies = [ {xPos:10, yPos:10, xVel: sv, yVel: sv},
               ];
 
 var drag = d3.behavior.drag()
-    .origin(function(d) { 
-      var boardCoords = d3.select('body').selectAll('.gameBoard')[0][0].getBoundingClientRect();
-      return {x:8, y:62};})
-    .on("drag", dragmove);
+    .on("drag", function(d){
+      var x = d3.event.x;
+      var y = d3.event.y;
+      d3.select(this)
+      .attr("cx", Math.max(d.r, Math.min(+gameOptions.width.slice(0,-2) - d.r, x)))
+      .attr("cy", Math.max(d.r, Math.min(+gameOptions.height.slice(0,-2) - d.r, y)));
+    });
 
 var player = [{x:50, y:50, r:10}];
 
