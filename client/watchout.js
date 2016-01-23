@@ -28,6 +28,24 @@ var enemies = [ {xPos:10, yPos:10, xVel: sv, yVel: sv},
                 {xPos:40, yPos:80, xVel: sv, yVel: sv},
               ];
 
+var drag = d3.behavior.drag()
+    .origin(function(d) { 
+      var boardCoords = d3.select('body').selectAll('.gameBoard')[0][0].getBoundingClientRect();
+      return {x:8, y:62};})
+    .on("drag", dragmove);
+
+var player = [{x:50, y:50, r:10}];
+
+d3.select('.gameBoard').selectAll('.player')
+  .data(player)
+  .enter()
+  .append('circle')
+  .attr('class','player')
+  .attr('cx', function(d){return axes.x(d.x);})
+  .attr('cy', function(d){return axes.y(d.y);})
+  .attr('r', function(d){return d.r;})
+  .call(drag);
+
 var integrateVelocity = function(enemy, xOrY) {
   enemy[xOrY + "Pos"] += enemy[xOrY + "Vel"] * gameOptions.stepInterval;
   return enemy[xOrY + 'Pos'];
@@ -45,22 +63,30 @@ var updatePosition = function(enemy, xOrY) {
   return axes[xOrY](enemy[xOrY + 'Pos']);
 };
 
+
+
+function dragmove(d) {
+  var x = d3.event.x;
+  var y = d3.event.y;
+  d3.select(this)
+      .attr("cx", Math.max(d.r, Math.min(+gameOptions.width.slice(0,-2) - d.r, event.x))-8)
+      .attr("cy", Math.max(d.r, Math.min(+gameOptions.height.slice(0,-2) - d.r, event.y))-62);
+}
+
 var update = function() {
   //updateEnemies
-  var enemiesSelection = d3.select('.gameBoard').selectAll('circle')
+  var enemiesSelection = d3.select('.gameBoard').selectAll('.enemy')
     .data(enemies);
-    
-
   enemiesSelection.enter()
-    .append('circle').attr('class','enemy');
-
+    .append('circle')
+    .attr('class','enemy');
   enemiesSelection.attr('cx', function(d){
       return updatePosition(d, 'x');})
     .attr('cy', function(d){
       return updatePosition(d, 'y');})
     .attr('r', 5); //could come back and make styling data-dependent
-
-  enemiesSelection.exit().remove();
+  enemiesSelection.exit()
+    .remove();
   //updatePlayer()
 };
 
