@@ -16,7 +16,7 @@ svg {
 }
 .enemy {
   fill: rgba(250,0,0,0.3);
-  animation: rotate 1s linear infinite;
+  animation: rotate 2s linear infinite;
   transform-origin: 50% 50%;
 }
 .centered {

@@ -102,6 +102,7 @@ var tweenWithCollisionDetection = function(endPosition) {
     //set attr
     enemy.attr('x', axes.x(midX))
           .attr('y', axes.y(midY));
+    enemy.style('animation-duration', (4*Math.abs(t - 0.5) + 2)+ 's');
   };
 };
 
