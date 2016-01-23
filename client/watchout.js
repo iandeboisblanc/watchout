@@ -22,21 +22,30 @@ var gameBoard = d3.select('.board').append('svg:svg')
                 .attr('height', gameOptions.height)
                 .attr('class','gameBoard');
 
-var sv = 0.1;
+var sv = 0.01;
 var enemies = [ {xPos:10, yPos:10, xVel: sv, yVel: sv},
                 {xPos:20, yPos:40, xVel: sv, yVel: sv},
                 {xPos:40, yPos:80, xVel: sv, yVel: sv},
               ];
 
+var integrateVelocity = function(enemy, xOrY) {
+  enemy[xOrY + "Pos"] += enemy[xOrY + "Vel"] * gameOptions.stepInterval;
+  return enemy[xOrY + 'Pos'];
+};
 
+var bounceOffWalls = function(enemy, xOrY) {
+  if(enemy[xOrY + 'Pos'] > 100 || enemy[xOrY + 'Pos'] < 0) {
+    enemy[xOrY + 'Vel'] *= -1; 
+  }
+};
 
-var integrateVelocity = function(enemy, key) {
-  enemy[key + "Pos"] += enemy[key + "Vel"] * gameOptions.stepInterval;
-  return enemy[key + 'Pos'];
+var updatePosition = function(enemy, xOrY) {
+  integrateVelocity(enemy, xOrY);
+  bounceOffWalls(enemy, xOrY);  
+  return axes[xOrY](enemy[xOrY + 'Pos']);
 };
 
 var update = function() {
-  console.log('update');
   //updateEnemies
   var enemiesSelection = d3.select('.gameBoard').selectAll('circle')
     .data(enemies);
@@ -46,9 +55,9 @@ var update = function() {
     .append('circle').attr('class','enemy');
 
   enemiesSelection.attr('cx', function(d){
-      return integrateVelocity(d, 'x');})
+      return updatePosition(d, 'x');})
     .attr('cy', function(d){
-      return integrateVelocity(d, 'y');})
+      return updatePosition(d, 'y');})
     .attr('r', 5); //could come back and make styling data-dependent
 
   enemiesSelection.exit().remove();
