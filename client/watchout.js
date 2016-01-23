@@ -5,17 +5,26 @@ var gameOptions = {
   nEnemies: '30px',
   padding: '20px',
   stepInterval: 1000, // miliseconds 
+  playerRadius: 30,
+  enemyRadius: 15
 };
 
 var gameStats = {
   score: 0,
-  bestScore: 0
+  bestScore: 0,
+  collisions: 0
 };
 
 var axes = {
   x: d3.scale.linear().domain([0,100]).range([0,gameOptions.width]),
   y: d3.scale.linear().domain([0,100]).range([0,gameOptions.height])
 };
+
+var random = Math.random;
+var pow = Math.pow;
+var max = Math.max;
+var min = Math.min;
+var sqrt = Math.sqrt;
 
 var gameBoard = d3.select('.board').append('svg:svg')
                 .attr('width', gameOptions.width)
@@ -32,11 +41,11 @@ var drag = d3.behavior.drag()
       var x = d3.event.x;
       var y = d3.event.y;
       d3.select(this)
-      .attr("cx", Math.max(d.r, Math.min(+gameOptions.width.slice(0,-2) - d.r, x)))
-      .attr("cy", Math.max(d.r, Math.min(+gameOptions.height.slice(0,-2) - d.r, y)));
+      .attr("cx", max(d.r, min(+gameOptions.width.slice(0,-2) - d.r, x)))
+      .attr("cy", max(d.r, min(+gameOptions.height.slice(0,-2) - d.r, y)));
     });
 
-var player = [{x:50, y:50, r:10}];
+var player = [{x:50, y:50, r:gameOptions.playerRadius}];
 
 d3.select('.gameBoard').selectAll('.player')
   .data(player)
@@ -50,8 +59,8 @@ d3.select('.gameBoard').selectAll('.player')
 
 
 var updatePosition = function(d) {
-  d.x = Math.random()*100;
-  d.y = Math.random()*100;
+  d.x = random()*100;
+  d.y = random()*100;
 };
 
 var tweenWithCollisionDetection = function(endPosition) {
@@ -61,8 +70,8 @@ var tweenWithCollisionDetection = function(endPosition) {
   updatePosition(enemy.datum());
 
   return function(t) {
-    //checkforCollisions
-    //checkforCollisions();
+    //check for collisions
+    checkForCollisions(enemy);
     //have new positions
     var midX = startX + (endPosition.x - startX) * t;
     var midY = startY + (endPosition.y - startY) * t;
@@ -72,12 +81,30 @@ var tweenWithCollisionDetection = function(endPosition) {
   };
 };
 
+var checkForCollisions = function (enemy) {
+  var playerD = d3.select('.player').datum();
+  var enemyD = {x: +(enemy.attr('cx').slice(0,-2)),
+                y: +(enemy.attr('cy').slice(0,-2))}; //calc distance
+  var distance = sqrt(pow(+(axes.x(playerD.x).slice(0,-2) - enemyD.x),2) + pow(+(axes.y(playerD.y).slice(0,-2) - enemyD.y),2));
+  //if distance < sum of radii
+  if(distance < gameOptions.playerRadius + gameOptions.enemyRadius) {
+    gameStats.collisions++;
+    gameStats.bestScore = max(gameStats.bestScore, gameStats.score);
+    gameStats.score = 0;
+    console.log('BOOM!');
+  }
+};
+
 function dragmove(d) {
-  var x = d3.event.x;
-  var y = d3.event.y;
+  // var x = d3.event.x;
+  // var y = d3.event.y;
+  var newX = max(d.r, min(+gameOptions.width.slice(0,-2) - d.r, event.x));
+  var newY = max(d.r, min(+gameOptions.width.slice(0,-2) - d.r, event.y));
+  d.x = newX;
+  d.y = newY;
   d3.select(this)
-      .attr("cx", Math.max(d.r, Math.min(+gameOptions.width.slice(0,-2) - d.r, event.x))-8)
-      .attr("cy", Math.max(d.r, Math.min(+gameOptions.height.slice(0,-2) - d.r, event.y))-62);
+      .attr("cx", newX) //max(d.r, min(+gameOptions.width.slice(0,-2) - d.r, event.x)))//-8)
+      .attr("cy", newY); //max(d.r, min(+gameOptions.height.slice(0,-2) - d.r, event.y)));//-62);
 }
 
 var update = function() {
@@ -87,18 +114,15 @@ var update = function() {
   enemiesSelection.enter()
     .append('circle')
     .attr('class','enemy')
-    .attr('r', 5); //could come back and make styling data-dependent
+    .attr('cx', function(d) { return axes.x(d.x); })
+    .attr('cy', function(d) { return axes.y(d.y); })
+    .attr('r', gameOptions.enemyRadius); //could come back and make styling data-dependent
   enemiesSelection
     .transition()
     .duration(gameOptions.stepInterval)
     .tween('custom', tweenWithCollisionDetection);
-    // .attr('cx', function(d){
-    //   return updatePosition(d, 'x');})
-    // .attr('cy', function(d){
-    //   return updatePosition(d, 'y');});
   enemiesSelection.exit()
     .remove();
-  //updatePlayer()
 };
 
 update();
