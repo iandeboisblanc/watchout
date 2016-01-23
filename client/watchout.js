@@ -52,10 +52,7 @@ var gameBoard = d3.select('.board').append('svg:svg')
 d3.select('.centered')
   .style('width', gameOptions.width);
 
-var enemies = [ {x:10, y:10, colliding:false},
-                {x:20, y:40, colliding:false},
-                {x:40, y:80, colliding:false},
-              ];
+var enemies = [{x:100*random(), y:100*random(), colliding: false}];
 
 var drag = d3.behavior.drag()
     .on("drag", function(d){
@@ -113,10 +110,13 @@ var checkForCollisions = function (enemy) {
   var distance = sqrt(pow((numericAxes.x(playerD.x) - enemyD.x),2) + pow((numericAxes.y(playerD.y) - enemyD.y),2));
   //if distance < sum of radii
   if(distance < gameOptions.playerRadius + gameOptions.enemyRadius) {
+    enemies = [];
+    //remove cycle here.
     gameStats.collisions++;
     gameStats.bestScore = max(gameStats.bestScore, gameStats.score);
     gameStats.score = 0;
     enemy.colliding = true;
+    addEmeny();
     setTimeout(function(){enemy.colliding = false;}, 500);
   }
 };
@@ -141,15 +141,23 @@ var update = function() {
     .remove();
 };
 
+var addEmeny = function() {
+  enemies.push({x:100*random(), y:100*random(), colliding:false});
+};
+
 update();
 setInterval(update, gameOptions.stepInterval);
 setInterval(function() {
   gameStats.score++;
+  if(!(gameStats.score % 50) || !enemies.length) {
+     addEmeny();
+  }
   d3.select('.scoreboard')
     .selectAll('span')
     .data([gameStats.bestScore, gameStats.score, gameStats.collisions])
     .text(function(d){return d;});
 },gameOptions.stepInterval/10);
+ 
 setInterval(function(){
   d3.select('.gameBoard')
     .data(player)
