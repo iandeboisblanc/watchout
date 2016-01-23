@@ -22,10 +22,9 @@ var gameBoard = d3.select('.board').append('svg:svg')
                 .attr('height', gameOptions.height)
                 .attr('class','gameBoard');
 
-var sv = 0.01;
-var enemies = [ {xPos:10, yPos:10, xVel: sv, yVel: sv},
-                {xPos:20, yPos:40, xVel: sv, yVel: sv},
-                {xPos:40, yPos:80, xVel: sv, yVel: sv},
+var enemies = [ {x:10, y:10},
+                {x:20, y:40},
+                {x:40, y:80},
               ];
 
 var drag = d3.behavior.drag()
@@ -49,26 +48,29 @@ d3.select('.gameBoard').selectAll('.player')
   .attr('r', function(d){return d.r;})
   .call(drag);
 
-var integrateVelocity = function(enemy, xOrY) {
-  enemy[xOrY + "Pos"] += enemy[xOrY + "Vel"] * gameOptions.stepInterval;
-  return enemy[xOrY + 'Pos'];
+
+var updatePosition = function(d) {
+  d.x = Math.random()*100;
+  d.y = Math.random()*100;
 };
 
-var bounceOffWalls = function(enemy, xOrY) {
-  if(enemy[xOrY + 'Pos'] > 100 || enemy[xOrY + 'Pos'] < 0) {
-    enemy[xOrY + 'Vel'] *= -1; 
-  }
+var tweenWithCollisionDetection = function(endPosition) {
+  var enemy = d3.select(this);
+  var startX = enemy.datum().x;
+  var startY = enemy.datum().y;
+  updatePosition(enemy.datum());
+
+  return function(t) {
+    //checkforCollisions
+    //checkforCollisions();
+    //have new positions
+    var midX = startX + (endPosition.x - startX) * t;
+    var midY = startY + (endPosition.y - startY) * t;
+    //set attr
+    enemy.attr('cx', axes.x(midX))
+          .attr('cy', axes.y(midY));
+  };
 };
-
-var updatePosition = function(enemy, xOrY) {
-  // integrateVelocity(enemy, xOrY);
-  // bounceOffWalls(enemy, xOrY);
-  //generate new xory randomly from 0 to 100
-  enemy[xOrY + 'Pos'] = Math.random()*100;  
-  return axes[xOrY](enemy[xOrY + 'Pos']);
-};
-
-
 
 function dragmove(d) {
   var x = d3.event.x;
@@ -84,18 +86,20 @@ var update = function() {
     .data(enemies);
   enemiesSelection.enter()
     .append('circle')
-    .attr('class','enemy');
+    .attr('class','enemy')
+    .attr('r', 5); //could come back and make styling data-dependent
   enemiesSelection
     .transition()
     .duration(gameOptions.stepInterval)
-    .attr('cx', function(d){
-      return updatePosition(d, 'x');})
-    .attr('cy', function(d){
-      return updatePosition(d, 'y');})
-    .attr('r', 5); //could come back and make styling data-dependent
+    .tween('custom', tweenWithCollisionDetection);
+    // .attr('cx', function(d){
+    //   return updatePosition(d, 'x');})
+    // .attr('cy', function(d){
+    //   return updatePosition(d, 'y');});
   enemiesSelection.exit()
     .remove();
   //updatePlayer()
 };
 
+update();
 setInterval(update, gameOptions.stepInterval);
