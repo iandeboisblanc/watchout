@@ -75,7 +75,6 @@ var tweenWithCollisionDetection = function(endPosition) {
   var startX = enemy.datum().x;
   var startY = enemy.datum().y;
   updatePosition(enemy.datum());
-
   return function(t) {
     //check for collisions
     checkForCollisions(enemy);
@@ -98,7 +97,6 @@ var checkForCollisions = function (enemy) {
     gameStats.collisions++;
     gameStats.bestScore = max(gameStats.bestScore, gameStats.score);
     gameStats.score = 0;
-    console.log('BOOM!');
   }
 };
 
@@ -122,3 +120,10 @@ var update = function() {
 
 update();
 setInterval(update, gameOptions.stepInterval);
+setInterval(function() {
+  gameStats.score++;
+  d3.select('.scoreboard')
+    .selectAll('span')
+    .data([gameStats.bestScore, gameStats.score, gameStats.collisions])
+    .text(function(d){return d;});
+},gameOptions.stepInterval/10);

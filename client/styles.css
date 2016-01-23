@@ -2,15 +2,20 @@
 
 /* Note: an asteroid image is included in this repo.
 Feel free to use it if you like. */
-
-
+body {
+  background-color: rgb(200,200,200);
+}
 svg {
   background-color: rgba(200,0,0, 0.5);
 }
 .enemy {
   fill: red;
 }
-
+.centered {
+  margin: auto;
+  width: 60%;
+  border: 3px solid #73AD21;
+}
 .player {
   fill: black;
   stroke: yellow;
