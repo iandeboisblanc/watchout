@@ -20,6 +20,11 @@ var axes = {
   y: d3.scale.linear().domain([0,100]).range([0,gameOptions.height])
 };
 
+var invertAxes = {
+  x: d3.scale.linear().domain([0,+gameOptions.width.slice(0,-2)]).range([0,100]),
+  y: d3.scale.linear().domain([0,+gameOptions.height.slice(0,-2)]).range([0,100])
+};
+
 var random = Math.random;
 var pow = Math.pow;
 var max = Math.max;
@@ -40,6 +45,8 @@ var drag = d3.behavior.drag()
     .on("drag", function(d){
       var x = d3.event.x;
       var y = d3.event.y;
+      d.x = invertAxes.x(x);
+      d.y = invertAxes.y(y);
       d3.select(this)
       .attr("cx", max(d.r, min(+gameOptions.width.slice(0,-2) - d.r, x)))
       .attr("cy", max(d.r, min(+gameOptions.height.slice(0,-2) - d.r, y)));
@@ -94,18 +101,6 @@ var checkForCollisions = function (enemy) {
     console.log('BOOM!');
   }
 };
-
-function dragmove(d) {
-  // var x = d3.event.x;
-  // var y = d3.event.y;
-  var newX = max(d.r, min(+gameOptions.width.slice(0,-2) - d.r, event.x));
-  var newY = max(d.r, min(+gameOptions.width.slice(0,-2) - d.r, event.y));
-  d.x = newX;
-  d.y = newY;
-  d3.select(this)
-      .attr("cx", newX) //max(d.r, min(+gameOptions.width.slice(0,-2) - d.r, event.x)))//-8)
-      .attr("cy", newY); //max(d.r, min(+gameOptions.height.slice(0,-2) - d.r, event.y)));//-62);
-}
 
 var update = function() {
   //updateEnemies
